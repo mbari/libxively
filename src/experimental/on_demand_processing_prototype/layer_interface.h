@@ -14,8 +14,8 @@ struct __matrix_layer;
 /**
  * \brief 	layer states it simplifies the between layer communication
  * \note  	This is part of the standarized protocol of communication that 
- * 		  	has been designed in order to provide the minimum of the restriction
- *		  	with maximum capabilities.
+ * 		  	has been designed in order to provide the minimum restrictions, 
+ *			in order to make the usage safe, with maximum capabilities.
  */
 typedef enum
 {
@@ -81,25 +81,28 @@ typedef struct layer_interface
 } layer_interface_t;
 
 /**
- * \brief the magic begins here
+ * \brief The mirror class that makes the access to the generated types
+ * 			possible
  */
 typedef struct __matrix_layer
 {
 	layer_interface_t 		layer_functions;
 	layer_connectivity_t	layer_connection;
+	void*					user_data;
 } __matrix_layer_t;
 
 #define DECLARE_LAYER( layer_name ) typedef struct layer_name\
 {\
 	layer_interface_t 		layer_functions;\
 	layer_connectivity_t	layer_connection;\
-} layer_name##_t;\
-
+	void*					user_data;\
+} layer_name##_t
 
 #define LAYER_INSTANCE( layer_name, layer_name_instance, __on_demand, __on_data_ready, __close, __on_close )\
 	layer_name##_t layer_name_instance = { { __on_demand, __on_data_ready, __close, __on_close }, { 0, 0, 0 } };\
 	void* layer_name_instance##__ptr = &layer_name_instance;\
-	layer_name_instance.layer_connection.self = layer_name_instance##__ptr;
+	layer_name_instance.layer_connection.self = layer_name_instance##__ptr;\
+	layer_name_instance.user_data = ( void* ) ( intptr_t ) 0x01;
 
 #define CONNECT_LAYERS( lp_i, ln_i )\
 	ln_i.layer_connection.prev 	= ( void* ) &lp_i;\

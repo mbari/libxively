@@ -33,7 +33,7 @@ DECLARE_LAYER( dummy_layer2 );
 
 layer_state_t dummy_layer2_on_demand( layer_connectivity_t* context, const char* buffer, size_t size )
 {
-	printf( "dummy_layer2_on_demand\n" );
+	printf( "dummy_layer2_on_demand %p\n", context->self->user_data );
 	return LAYER_STATE_OK;
 }
 
