@@ -32,8 +32,6 @@ typedef enum
 typedef struct layer_connectivity
 {
 	struct __matrix_layer* self;
-	struct __matrix_layer* higher;
-	struct __matrix_layer* lower;
 } layer_connectivity_t;
 
 /**
@@ -59,12 +57,12 @@ typedef struct layer_connectivity
 typedef struct layer_interface
 {
 	/**
-	 * \brief the function that is called whenever the lower layer wants more data to process/send over some kind of the connection
+	 * \brief the function that is called whenever the prev layer wants more data to process/send over some kind of the connection
 	 */
 	layer_state_t ( *on_demand )( layer_connectivity_t* context, const char* buffer, size_t size );
 
 	/**
-	 * \brief the function that is called whenever there is data that is ready and it's source is the lower layer
+	 * \brief the function that is called whenever there is data that is ready and it's source is the prev layer
 	 */
 	layer_state_t ( *on_data_ready )( layer_connectivity_t* context, char* buffer, size_t size );
 
@@ -74,7 +72,7 @@ typedef struct layer_interface
 	layer_state_t ( *close )( layer_connectivity_t* context );
 
 	/**
-	 * \brief whenver the processing chain is going to be closed it's source is in the lower layer
+	 * \brief whenver the processing chain is going to be closed it's source is in the prev layer
 	 */
 	layer_state_t ( *on_close )( layer_connectivity_t* context );
 
@@ -101,20 +99,20 @@ typedef struct __matrix_layer
 	void* layer_name_instance##__ptr = &layer_name_instance;\
 	layer_name_instance.layer_connection.self = layer_name_instance##__ptr;
 
-#define CONNECT_LAYERS( lh_i, ll_i )\
-	lh_i.layer_connection.lower 	= ( void* ) &ll_i;\
-	ll_i.layer_connection.higher 	= ( void* ) &lh_i
+#define CONNECT_LAYERS( lp_i, ln_i )\
+	ln_i.layer_connection.prev 	= ( void* ) &lp_i;\
+	lp_i.layer_connection.next 	= ( void* ) &ln_i
 
 #define LAYER_GET_CONTEXT_PTR( instance )\
 	&instance.layer_connection
 
 #define CALL_ON_SELF_ON_DEMAND( context, buffer, size )\
-	context.layer_connection.self->layer_functions.on_demand( ( void* ) context.layer_connection.self, buffer, size )
+	context.layer_connection.self->layer_functions.on_demand( ( void* ) &context.layer_connection.self->layer_connection, buffer, size )
 
-#define CALL_ON_HIGHER_ON_DEMAND( context, buffer, size )\
-	context.layer_connection.higher->layer_functions.on_demand( ( void* ) context.layer_connection.higher, buffer, size )
+#define CALL_ON_NEXT_ON_DEMAND( context, buffer, size )\
+	context.layer_connection.next->layer_functions.on_demand( ( void* ) &context.layer_connection.next->layer_connection, buffer, size )
 
-#define CALL_ON_LOWER_ON_DEMAND( context, buffer, size )\
-	context.layer_connection.lower->layer_functions.on_demand( ( void* ) context.layer_connection.lower, buffer, size )
+#define CALL_ON_PREV_ON_DEMAND( context, buffer, size )\
+	context.layer_connection.prev->layer_functions.on_demand( ( void* ) &context.layer_connection.prev->layer_connection, buffer, size )
 
 #endif
