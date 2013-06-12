@@ -63,7 +63,7 @@ int main( int argc, const char* argv[] )
 
 	CONNECT_LAYERS( dummy_layer1_instance, dummy_layer2_instance );
 
-	CALL_ON_LOWER_ON_DEMAND( dummy_layer1_instance, 0, 0 );
+	CALL_ON_NEXT_ON_DEMAND( dummy_layer1_instance, 0, 0 );
 	//dummy_layer1_instance.layer_functions.on_demand( 0, 0 );
 
 	return 0;
