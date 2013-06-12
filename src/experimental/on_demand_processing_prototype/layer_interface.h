@@ -32,6 +32,8 @@ typedef enum
 typedef struct layer_connectivity
 {
 	struct __matrix_layer* self;
+	struct __matrix_layer* next;
+	struct __matrix_layer* prev;
 } layer_connectivity_t;
 
 /**
