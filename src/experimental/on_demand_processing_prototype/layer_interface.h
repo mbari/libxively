@@ -100,8 +100,7 @@ typedef struct __matrix_layer
 
 #define LAYER_INSTANCE( layer_name, layer_name_instance, __on_demand, __on_data_ready, __close, __on_close )\
     layer_name##_t layer_name_instance = { { __on_demand, __on_data_ready, __close, __on_close }, { 0, 0, 0 } };\
-    void* layer_name_instance##__ptr = &layer_name_instance;\
-    layer_name_instance.layer_connection.self = layer_name_instance##__ptr;\
+    layer_name_instance.layer_connection.self = ( void* ) &layer_name_instance;\
     layer_name_instance.user_data = ( void* ) ( intptr_t ) 0x01;
 
 #define CONNECT_LAYERS( lp_i, ln_i )\
