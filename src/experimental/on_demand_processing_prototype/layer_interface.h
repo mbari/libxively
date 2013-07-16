@@ -99,9 +99,9 @@ typedef struct __matrix_layer
 } layer_name##_t
 
 #define LAYER_INSTANCE( layer_name, layer_name_instance, __on_demand, __on_data_ready, __close, __on_close )\
-    layer_name##_t layer_name_instance = { { __on_demand, __on_data_ready, __close, __on_close }, { 0, 0, 0 } };\
-    layer_name_instance.layer_connection.self = ( void* ) &layer_name_instance;\
-    layer_name_instance.user_data = ( void* ) ( intptr_t ) 0x01;
+    layer_name##_t layer_name_instance          = { { __on_demand, __on_data_ready, __close, __on_close }, { 0, 0, 0 }, 0 };\
+    layer_name_instance.layer_connection.self   = ( void* ) &layer_name_instance;\
+    layer_name_instance.user_data               = ( void* ) &layer_name_instance;
 
 #define CONNECT_LAYERS( lp_i, ln_i )\
     ln_i.layer_connection.prev  = ( void* ) &lp_i;\
@@ -112,43 +112,54 @@ typedef struct __matrix_layer
 
 // ON_DEMAND
 #define CALL_ON_SELF_ON_DEMAND( context, buffer, size )\
-    context.layer_connection.self->layer_functions.on_demand( ( void* ) &context.layer_connection.self->layer_connection, buffer, size )
+    context.layer_connection.self->layer_functions.on_demand(\
+        ( void* ) &context.layer_connection.self->layer_connection, buffer, size )
 
 #define CALL_ON_NEXT_ON_DEMAND( context, buffer, size )\
-    context.layer_connection.next->layer_functions.on_demand( ( void* ) &context.layer_connection.next->layer_connection, buffer, size )
+    context.layer_connection.next->layer_functions.on_demand(\
+        ( void* ) &context.layer_connection.next->layer_connection, buffer, size )
 
 #define CALL_ON_PREV_ON_DEMAND( context, buffer, size )\
-    context.layer_connection.prev->layer_functions.on_demand( ( void* ) &context.layer_connection.prev->layer_connection, buffer, size )
+    context.layer_connection.prev->layer_functions.on_demand(\
+        ( void* ) &context.layer_connection.prev->layer_connection, buffer, size )
 
 // ON_DATA_READY
 #define CALL_ON_SELF_ON_DATA_READY( context, buffer, size )\
-    context.layer_connection.self->layer_functions.on_data_ready( ( void* ) &context.layer_connection.self->layer_connection, buffer, size )
+    context.layer_connection.self->layer_functions.on_data_ready(\
+        ( void* ) &context.layer_connection.self->layer_connection, buffer, size )
 
 #define CALL_ON_NEXT_ON_DATA_READY( context, buffer, size )\
-    context.layer_connection.next->layer_functions.on_data_ready( ( void* ) &context.layer_connection.next->layer_connection, buffer, size )
+    context.layer_connection.next->layer_functions.on_data_ready(\
+        ( void* ) &context.layer_connection.next->layer_connection, buffer, size )
 
 #define CALL_ON_PREV_ON_DATA_READY( context, buffer, size )\
-    context.layer_connection.prev->layer_functions.on_data_ready( ( void* ) &context.layer_connection.prev->layer_connection, buffer, size )
+    context.layer_connection.prev->layer_functions.on_data_ready(\
+        ( void* ) &context.layer_connection.prev->layer_connection, buffer, size )
 
 // CLOSE
 #define CALL_ON_SELF_CLOSE( context )\
-    context.layer_connection.self->layer_functions.close( ( void* ) &context.layer_connection.self->layer_connection )
+    context.layer_connection.self->layer_functions.close(\
+        ( void* ) &context.layer_connection.self->layer_connection )
 
 #define CALL_ON_NEXT_CLOSE( context )\
-    context.layer_connection.next->layer_functions.close( ( void* ) &context.layer_connection.next->layer_connection )
+    context.layer_connection.next->layer_functions.close(\
+        ( void* ) &context.layer_connection.next->layer_connection )
 
 #define CALL_ON_PREV_CLOSE( context )\
-    context.layer_connection.prev->layer_functions.close( ( void* ) &context.layer_connection.prev->layer_connection )
+    context.layer_connection.prev->layer_functions.close(\
+        ( void* ) &context.layer_connection.prev->layer_connection )
 
 // ON_CLOSE
 #define CALL_ON_SELF_ON_CLOSE( context )\
-    context.layer_connection.self->layer_functions.on_close( ( void* ) &context.layer_connection.self->layer_connection )
+    context.layer_connection.self->layer_functions.on_close(\
+        ( void* ) &context.layer_connection.self->layer_connection )
 
 #define CALL_ON_NEXT_ON_CLOSE( context )\
-    context.layer_connection.next->layer_functions.on_close( ( void* ) &context.layer_connection.next->layer_connection )
+    context.layer_connection.next->layer_functions.on_close(\
+        ( void* ) &context.layer_connection.next->layer_connection )
 
 #define CALL_ON_PREV_ON_CLOSE( context )\
-    context.layer_connection.prev->layer_functions.on_close( ( void* ) &context.layer_connection.prev->layer_connection )
-
+    context.layer_connection.prev->layer_functions.on_close(\
+        ( void* ) &context.layer_connection.prev->layer_connection )
 
 #endif
