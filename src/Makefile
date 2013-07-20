@@ -2,7 +2,7 @@ include ../Makefile.include
 
 CREATE_DIRS := $(XI_BINDIR) $(XI_OBJDIR)
 
-XI_SRCDIRS = libxively examples tests
+XI_SRCDIRS = libxively examples tests experimental
 
 SUB_BINDIRS = $(addprefix $(XI_BINDIR)/,$(XI_SRCDIRS))
 
