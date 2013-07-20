@@ -7,12 +7,18 @@ DECLARE_LAYER( dummy_layer1 );
 
 layer_state_t dummy_layer1_on_demand( layer_connectivity_t* context, const char* buffer, size_t size )
 {
+    ( void ) size;
+    ( void ) buffer;
+
 	printf( "dummy_layer1_on_demand %p\n", context->self->user_data );
 	return LAYER_STATE_OK;
 }
 
 layer_state_t dummy_layer1_on_data_ready( layer_connectivity_t* context, char* buffer, size_t size )
 {
+    ( void ) size;
+    ( void ) buffer;
+
 	printf( "dummy_layer1_on_data_ready %p\n", context->self->user_data );
 	return LAYER_STATE_OK;
 }
@@ -33,12 +39,18 @@ DECLARE_LAYER( dummy_layer2 );
 
 layer_state_t dummy_layer2_on_demand( layer_connectivity_t* context, const char* buffer, size_t size )
 {
+    ( void ) size;
+    ( void ) buffer;
+
 	printf( "dummy_layer2_on_demand %p\n", context->self->user_data );
 	return LAYER_STATE_OK;
 }
 
 layer_state_t dummy_layer2_on_data_ready( layer_connectivity_t* context, char* buffer, size_t size )
 {
+    ( void ) size;
+    ( void ) buffer;
+
 	printf( "dummy_layer2_on_data_ready %p\n", context->self->user_data );
 	return LAYER_STATE_OK;
 }
@@ -57,9 +69,11 @@ layer_state_t dummy_layer2_on_close( layer_connectivity_t* context )
 
 int main( int argc, const char* argv[] )
 {
-
-    int user_data = 0;
+    ( void ) argc;
+    ( void ) argv;
     
+    int user_data = 0;
+
 	LAYER_INSTANCE( dummy_layer1, dummy_layer1_instance, &dummy_layer1_on_demand, &dummy_layer1_on_data_ready, &dummy_layer1_close, &dummy_layer1_on_close, user_data );
 	LAYER_INSTANCE( dummy_layer2, dummy_layer2_instance, &dummy_layer2_on_demand, &dummy_layer2_on_data_ready, &dummy_layer2_close, &dummy_layer2_on_close, user_data );
 
