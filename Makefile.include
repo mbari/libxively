@@ -12,7 +12,7 @@ ifndef XI_OVERRIDE_CFLAGS
     XI_CFLAGS += -O2 -combine -fwhole-program
   endif
   ifeq ($(XI_BUILD_TYPE),debug)
-    XI_CFLAGS += -O0 -D XI_DEBUG_OUTPUT
+    XI_CFLAGS += -O0 -D XI_DEBUG_OUTPUT -D __DEBUG
 
   endif
   XI_CFLAGS += $(foreach constant,$(XI_OVERRIDE_CONSTANTS),-D$(constant))
