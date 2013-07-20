@@ -80,6 +80,25 @@ typedef struct layer_interface
 
 } layer_interface_t;
 
+#ifdef __DEBUG
+/**
+ * \struct  __layer_debug_info
+ * \brief   The structure holds information related to the layer debugging. Here the original place of initialization
+ *          or connection is being stored so it's easier to determine what layer is it.
+ */
+typedef struct __layer_debug_info
+{
+    int                     debug_line_init;
+    const char*             debug_file_init;
+
+    int                     debug_line_connect;
+    const char*             debug_file_connect;
+
+    int                     debug_line_last_call;
+    const char*             debug_file_last_call;
+} __layer_debug_info_t;
+#endif
+
 /**
  * \brief The mirror class that makes the access to the generated types
  *          possible
@@ -89,77 +108,209 @@ typedef struct __matrix_layer
     layer_interface_t       layer_functions;
     layer_connectivity_t    layer_connection;
     void*                   user_data;
+#ifdef __DEBUG
+    __layer_debug_info_t    debug_info;
+#endif
 } __matrix_layer_t;
 
+
+#ifdef __DEBUG
+#define DECLARE_LAYER( layer_name ) typedef struct layer_name\
+{\
+    layer_interface_t       layer_functions;\
+    layer_connectivity_t    layer_connection;\
+    void*                   user_data;\
+    __layer_debug_info_t    debug_info;\
+} layer_name##_t
+#else
 #define DECLARE_LAYER( layer_name ) typedef struct layer_name\
 {\
     layer_interface_t       layer_functions;\
     layer_connectivity_t    layer_connection;\
     void*                   user_data;\
 } layer_name##_t
+#endif
 
-#define LAYER_INSTANCE( layer_name, layer_name_instance, __on_demand, __on_data_ready, __close, __on_close )\
+#ifdef __DEBUG
+#define LAYER_INSTANCE( layer_name, layer_name_instance, __on_demand, __on_data_ready, __close, __on_close, user_data )\
+    layer_name##_t layer_name_instance              = { { __on_demand, __on_data_ready, __close, __on_close }, { 0, 0, 0 }, 0 };\
+    layer_name_instance.layer_connection.self       = ( void* ) &layer_name_instance;\
+    layer_name_instance.user_data                   = ( void* ) &user_data;\
+    layer_name_instance.debug_info.debug_line_init  = __LINE__;\
+    layer_name_instance.debug_info.debug_file_init  = __FILE__;
+#else 
+#define LAYER_INSTANCE( layer_name, layer_name_instance, __on_demand, __on_data_ready, __close, __on_close, user_data )\
     layer_name##_t layer_name_instance          = { { __on_demand, __on_data_ready, __close, __on_close }, { 0, 0, 0 }, 0 };\
     layer_name_instance.layer_connection.self   = ( void* ) &layer_name_instance;\
-    layer_name_instance.user_data               = ( void* ) &layer_name_instance;
+    layer_name_instance.user_data               = ( void* ) &user_data;
+#endif
 
+#ifdef __DEBUG
+#define CONNECT_LAYERS( lp_i, ln_i )\
+    ln_i.layer_connection.prev  = ( void* ) &lp_i;\
+    lp_i.layer_connection.next  = ( void* ) &ln_i;\
+    lp_i.debug_info.debug_line_connect = __LINE__;\
+    lp_i.debug_info.debug_file_connect = __FILE__;\
+    ln_i.debug_info.debug_line_connect = __LINE__;\
+    ln_i.debug_info.debug_file_connect = __FILE__;
+#else
 #define CONNECT_LAYERS( lp_i, ln_i )\
     ln_i.layer_connection.prev  = ( void* ) &lp_i;\
     lp_i.layer_connection.next  = ( void* ) &ln_i
+#endif    
 
 #define LAYER_GET_CONTEXT_PTR( instance )\
     &instance.layer_connection
 
+#ifdef __DEBUG 
+#define SET_DEBUG_INFO_ON_SELF( context )\
+    context.layer_connection.self->debug_info.debug_line_last_call = __LINE__;\
+    context.layer_connection.self->debug_info.debug_file_last_call = __FILE__;
+
+#define SET_DEBUG_INFO_ON_NEXT( context )\
+    context.layer_connection.next->debug_info.debug_line_last_call = __LINE__;\
+    context.layer_connection.next->debug_info.debug_file_last_call = __FILE__;
+
+#define SET_DEBUG_INFO_ON_PREV( context )\
+    context.layer_connection.prev->debug_info.debug_line_last_call = __LINE__;\
+    context.layer_connection.prev->debug_info.debug_file_last_call = __FILE__;
+#endif 
+
+
 // ON_DEMAND
+#ifdef __DEBUG
+#define CALL_ON_SELF_ON_DEMAND( context, buffer, size )\
+    context.layer_connection.self->layer_functions.on_demand(\
+        ( void* ) &context.layer_connection.self->layer_connection, buffer, size );\
+    SET_DEBUG_INFO_ON_SELF( context )
+#else 
 #define CALL_ON_SELF_ON_DEMAND( context, buffer, size )\
     context.layer_connection.self->layer_functions.on_demand(\
         ( void* ) &context.layer_connection.self->layer_connection, buffer, size )
+#endif
 
+#ifdef __DEBUG
+#define CALL_ON_NEXT_ON_DEMAND( context, buffer, size )\
+    context.layer_connection.next->layer_functions.on_demand(\
+        ( void* ) &context.layer_connection.next->layer_connection, buffer, size );\
+    SET_DEBUG_INFO_ON_NEXT( context )
+#else 
 #define CALL_ON_NEXT_ON_DEMAND( context, buffer, size )\
     context.layer_connection.next->layer_functions.on_demand(\
         ( void* ) &context.layer_connection.next->layer_connection, buffer, size )
+#endif
 
+#ifdef __DEBUG
+#define CALL_ON_PREV_ON_DEMAND( context, buffer, size )\
+    context.layer_connection.prev->layer_functions.on_demand(\
+        ( void* ) &context.layer_connection.prev->layer_connection, buffer, size );\
+    SET_DEBUG_INFO_ON_PREV( context )
+#else 
 #define CALL_ON_PREV_ON_DEMAND( context, buffer, size )\
     context.layer_connection.prev->layer_functions.on_demand(\
         ( void* ) &context.layer_connection.prev->layer_connection, buffer, size )
+#endif
 
 // ON_DATA_READY
+#ifdef __DEBUG
+#define CALL_ON_SELF_ON_DATA_READY( context, buffer, size )\
+    context.layer_connection.self->layer_functions.on_data_ready(\
+        ( void* ) &context.layer_connection.self->layer_connection, buffer, size );\
+    SET_DEBUG_INFO_ON_SELF( context )
+#else 
 #define CALL_ON_SELF_ON_DATA_READY( context, buffer, size )\
     context.layer_connection.self->layer_functions.on_data_ready(\
         ( void* ) &context.layer_connection.self->layer_connection, buffer, size )
+#endif
 
+#ifdef __DEBUG
+#define CALL_ON_NEXT_ON_DATA_READY( context, buffer, size )\
+    context.layer_connection.next->layer_functions.on_data_ready(\
+        ( void* ) &context.layer_connection.next->layer_connection, buffer, size );\
+    SET_DEBUG_INFO_ON_NEXT( context )
+#else 
 #define CALL_ON_NEXT_ON_DATA_READY( context, buffer, size )\
     context.layer_connection.next->layer_functions.on_data_ready(\
         ( void* ) &context.layer_connection.next->layer_connection, buffer, size )
+#endif
 
+#ifdef __DEBUG
+#define CALL_ON_PREV_ON_DATA_READY( context, buffer, size )\
+    context.layer_connection.prev->layer_functions.on_data_ready(\
+        ( void* ) &context.layer_connection.prev->layer_connection, buffer, size );\
+    SET_DEBUG_INFO_ON_PREV( context )
+#else 
 #define CALL_ON_PREV_ON_DATA_READY( context, buffer, size )\
     context.layer_connection.prev->layer_functions.on_data_ready(\
         ( void* ) &context.layer_connection.prev->layer_connection, buffer, size )
+#endif
 
 // CLOSE
+#ifdef __DEBUG
+#define CALL_ON_SELF_CLOSE( context )\
+    context.layer_connection.self->layer_functions.close(\
+        ( void* ) &context.layer_connection.self->layer_connection );\
+    SET_DEBUG_INFO_ON_SELF( context )
+#else 
 #define CALL_ON_SELF_CLOSE( context )\
     context.layer_connection.self->layer_functions.close(\
         ( void* ) &context.layer_connection.self->layer_connection )
+#endif
 
+#ifdef __DEBUG
+#define CALL_ON_NEXT_CLOSE( context )\
+    context.layer_connection.next->layer_functions.close(\
+        ( void* ) &context.layer_connection.next->layer_connection );\
+    SET_DEBUG_INFO_ON_NEXT( context )
+#else 
 #define CALL_ON_NEXT_CLOSE( context )\
     context.layer_connection.next->layer_functions.close(\
         ( void* ) &context.layer_connection.next->layer_connection )
+#endif
 
+#ifdef __DEBUG
+#define CALL_ON_PREV_CLOSE( context )\
+    context.layer_connection.prev->layer_functions.close(\
+        ( void* ) &context.layer_connection.prev->layer_connection );\
+    SET_DEBUG_INFO_ON_PREV( context )
+#else 
 #define CALL_ON_PREV_CLOSE( context )\
     context.layer_connection.prev->layer_functions.close(\
         ( void* ) &context.layer_connection.prev->layer_connection )
+#endif
 
 // ON_CLOSE
+#ifdef __DEBUG
+#define CALL_ON_SELF_ON_CLOSE( context )\
+    context.layer_connection.self->layer_functions.on_close(\
+        ( void* ) &context.layer_connection.self->layer_connection );\
+    SET_DEBUG_INFO_ON_SELF( context )
+#else 
 #define CALL_ON_SELF_ON_CLOSE( context )\
     context.layer_connection.self->layer_functions.on_close(\
         ( void* ) &context.layer_connection.self->layer_connection )
+#endif
 
+#ifdef __DEBUG
+#define CALL_ON_NEXT_ON_CLOSE( context )\
+    context.layer_connection.next->layer_functions.on_close(\
+        ( void* ) &context.layer_connection.next->layer_connection );\
+    SET_DEBUG_INFO_ON_NEXT( context )
+#else 
 #define CALL_ON_NEXT_ON_CLOSE( context )\
     context.layer_connection.next->layer_functions.on_close(\
         ( void* ) &context.layer_connection.next->layer_connection )
+#endif
 
+#ifdef __DEBUG
+#define CALL_ON_PREV_ON_CLOSE( context )\
+    context.layer_connection.prev->layer_functions.on_close(\
+        ( void* ) &context.layer_connection.prev->layer_connection );\
+    SET_DEBUG_INFO_ON_PREV( context )
+#else 
 #define CALL_ON_PREV_ON_CLOSE( context )\
     context.layer_connection.prev->layer_functions.on_close(\
         ( void* ) &context.layer_connection.prev->layer_connection )
+#endif
 
 #endif

@@ -58,8 +58,10 @@ layer_state_t dummy_layer2_on_close( layer_connectivity_t* context )
 int main( int argc, const char* argv[] )
 {
 
-	LAYER_INSTANCE( dummy_layer1, dummy_layer1_instance, &dummy_layer1_on_demand, &dummy_layer1_on_data_ready, &dummy_layer1_close, &dummy_layer1_on_close );
-	LAYER_INSTANCE( dummy_layer2, dummy_layer2_instance, &dummy_layer2_on_demand, &dummy_layer2_on_data_ready, &dummy_layer2_close, &dummy_layer2_on_close );
+    int user_data = 0;
+    
+	LAYER_INSTANCE( dummy_layer1, dummy_layer1_instance, &dummy_layer1_on_demand, &dummy_layer1_on_data_ready, &dummy_layer1_close, &dummy_layer1_on_close, user_data );
+	LAYER_INSTANCE( dummy_layer2, dummy_layer2_instance, &dummy_layer2_on_demand, &dummy_layer2_on_data_ready, &dummy_layer2_close, &dummy_layer2_on_close, user_data );
 
 	CONNECT_LAYERS( dummy_layer1_instance, dummy_layer2_instance );
 
