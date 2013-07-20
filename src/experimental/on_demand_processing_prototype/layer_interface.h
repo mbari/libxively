@@ -1,6 +1,8 @@
 #ifndef __LAYER_INTERFACE_H__
 #define __LAYER_INTERFACE_H__
 
+#include <stdio.h>
+
 /**
  * \file    layer_interface.h
  * \author  Olgierd Humenczuk
@@ -133,7 +135,7 @@ typedef struct __matrix_layer
 
 #ifdef __DEBUG
 #define LAYER_INSTANCE( layer_name, layer_name_instance, __on_demand, __on_data_ready, __close, __on_close, user_data )\
-    layer_name##_t layer_name_instance              = { { __on_demand, __on_data_ready, __close, __on_close }, { 0, 0, 0 }, 0 };\
+    layer_name##_t layer_name_instance              = { { __on_demand, __on_data_ready, __close, __on_close }, { 0, 0, 0 }, 0, { 0, 0, 0, 0, 0, 0 } };\
     layer_name_instance.layer_connection.self       = ( void* ) &layer_name_instance;\
     layer_name_instance.user_data                   = ( void* ) &user_data;\
     layer_name_instance.debug_info.debug_line_init  = __LINE__;\
