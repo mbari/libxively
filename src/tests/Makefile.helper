@@ -16,6 +16,7 @@ include ../../../Makefile.include
 INCLUDE_DIRS 	+= ../../ext/tinytest
 INCLUDE_DIRS 	+= ../../libxively
 INCLUDE_DIRS 	+= ../../libxively/comm_layers/posix
+INCLUDE_DIRS    += ../../experimental/on_demand_processing_prototype
 #LIBRARIES 		+= $(XI)
 
 CFLAGS  += $(foreach includedir,$(INCLUDE_DIRS),-I$(includedir))
